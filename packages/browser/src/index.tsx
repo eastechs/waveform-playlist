@@ -123,7 +123,7 @@ export { ClipCollisionModifier } from './modifiers/ClipCollisionModifier';
 export { SnapToGridModifier } from './modifiers/SnapToGridModifier';
 export { noDropAnimationPlugins } from './plugins/noDropAnimationPlugins';
 
-// Export waveform-data.js utilities
+// Export audiowaveform-compatible peak utilities
 export {
   loadWaveformData,
   waveformDataToPeaks,

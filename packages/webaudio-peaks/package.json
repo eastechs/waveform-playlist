@@ -40,7 +40,8 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "PROVENANCE.md"
   ],
   "dependencies": {
     "@waveform-playlist/core": "workspace:*"

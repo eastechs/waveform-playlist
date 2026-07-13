@@ -6,7 +6,7 @@ import type { WaveformDrawMode } from '../wfpl-theme';
  *
  * Invariants (assumed from valid waveform input):
  * - min and max are normalized to [-1, 1] by dividing by 2^(bits-1)
- * - min <= max (min-of-mins, max-of-maxes — guaranteed by waveform-data library)
+ * - min <= max (min-of-mins, max-of-maxes — guaranteed by validated peak input)
  * - Values are finite (derived from integer typed arrays)
  *
  * Construct via aggregatePeaks() — do not create directly.
@@ -19,7 +19,7 @@ export interface AggregatedPeak {
 /**
  * Canvas fillRect parameters for a single waveform bar.
  * width >= 0 and height >= 0 when peak values are in [-1, 1] (guaranteed by
- * waveform-data library normalization).
+ * signed peak normalization).
  */
 export interface BarRect {
   x: number;

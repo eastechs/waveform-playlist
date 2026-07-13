@@ -13,9 +13,9 @@ import { Fade } from './index';
 import type { RenderMode, SpectrogramConfig, ColorMapValue } from './spectrogram';
 
 /**
- * WaveformData object from waveform-data.js library.
- * Supports resample() and slice() for dynamic zoom levels.
- * See: https://github.com/bbc/waveform-data.js
+ * Structural waveform peak object.
+ * Supports resample() and slice() for dynamic zoom levels without binding the
+ * project model to a specific parser implementation.
  */
 export interface WaveformDataObject {
   /** Sample rate of the original audio */
@@ -140,8 +140,8 @@ export interface AudioClip {
   color?: string;
 
   /**
-   * Pre-computed waveform data from waveform-data.js library.
-   * When provided, the library will use this instead of computing peaks from the audioBuffer.
+   * Pre-computed waveform data in the structural WaveformDataObject format.
+   * When provided, the library uses it instead of computing peaks from the audioBuffer.
    * Supports resampling to different zoom levels and slicing for clip trimming.
    * Load with: `const waveformData = await loadWaveformData('/path/to/peaks.dat')`
    */
@@ -249,7 +249,7 @@ export interface CreateClipOptions {
   color?: string;
   fadeIn?: Fade;
   fadeOut?: Fade;
-  /** Pre-computed waveform data from waveform-data.js (e.g., from BBC audiowaveform) */
+  /** Pre-computed waveform data (for example, parsed audiowaveform output) */
   waveformData?: WaveformDataObject;
   /** Sample rate - required if audioBuffer not provided */
   sampleRate?: number;
@@ -281,7 +281,7 @@ export interface CreateClipOptionsSeconds {
   color?: string;
   fadeIn?: Fade;
   fadeOut?: Fade;
-  /** Pre-computed waveform data from waveform-data.js (e.g., from BBC audiowaveform) */
+  /** Pre-computed waveform data (for example, parsed audiowaveform output) */
   waveformData?: WaveformDataObject;
   /** Sample rate - required if audioBuffer not provided */
   sampleRate?: number;

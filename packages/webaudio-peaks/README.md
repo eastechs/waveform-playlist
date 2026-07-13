@@ -38,6 +38,35 @@ const channelData = audioBuffer.getChannelData(0);
 const monoPeaks = extractPeaksFromBuffer(channelData, 1000);
 ```
 
+For reusable zoom and trim data, create a `PeakStore` instead:
+
+```typescript
+import {
+  createPeakStoreFromAudioBuffer,
+  createPeakWorker,
+  parseAudiowaveformBinary,
+} from '@waveform-playlist/webaudio-peaks';
+
+const store = createPeakStoreFromAudioBuffer(audioBuffer, 256, 16);
+const zoomedOut = store.resample({ scale: 1024 });
+const trimmed = store.sliceFrames(24000, 96000);
+
+// Worker input buffers are transferred rather than cloned.
+const worker = createPeakWorker();
+const generated = await worker.generate({
+  id: crypto.randomUUID(),
+  channels: [audioBuffer.getChannelData(0).slice().buffer],
+  sourceFrameCount: audioBuffer.length,
+  sampleRate: audioBuffer.sampleRate,
+  samplesPerPixel: 256,
+  bits: 16,
+  splitChannels: true,
+});
+worker.terminate();
+
+const precomputed = parseAudiowaveformBinary(await fetch('/peaks.dat').then((r) => r.arrayBuffer()));
+```
+
 ## API
 
 ### `extractPeaksFromBuffer(source, samplesPerPixel?, isMono?, cueIn?, cueOut?, bits?)`
@@ -76,6 +105,36 @@ type Peaks = Int8Array | Int16Array;
 type Bits = 8 | 16;
 ```
 
+### `PeakStore`
+
+`PeakStore` owns defensive copies of per-channel `Int8Array` or `Int16Array`
+min/max pairs and records the source sample rate, exact source frame count,
+samples per pixel, bit depth, and frame range represented by a view.
+
+- `resample({ scale })` creates a coarser store using min-of-mins and
+  max-of-maxes. Finer resampling is rejected because discarded source detail
+  cannot be reconstructed.
+- `sliceFrames(startFrame, endFrame)` creates a non-destructive frame-based
+  view. Unaligned boundaries retain every source bin that overlaps the view.
+- `slice()` and `channel()` preserve structural compatibility with the
+  `WaveformDataObject` accepted by waveform-playlist.
+- `copyChannelData()` and `toPeakData()` return defensive copies.
+
+### Audiowaveform parsing
+
+`parseAudiowaveformBinary()` and `parseAudiowaveformJson()` parse validated
+audiowaveform v1/v2 data without a runtime parser dependency. Invalid versions,
+headers, lengths, bit depths, channel counts, value ranges, and min/max pairs
+are rejected before a `PeakStore` is constructed.
+
+### Transferable worker
+
+`createPeakWorker()` creates a Blob-backed worker for base-resolution peak
+extraction. Channel `ArrayBuffer`s are transferred into the worker and peak
+buffers are transferred back. Requests have stable IDs, may be cancelled
+individually, reject on worker crashes, and expose `isTerminated()` so a caller
+can replace a failed worker. `terminate()` rejects all pending work.
+
 `Peaks`, `Bits`, and `PeakData` are re-exported from `@waveform-playlist/core` for convenience — you don't need to install `core` separately just to reference these types.
 
 ### Lower-level helpers
@@ -105,3 +164,5 @@ Guides and full API reference: [naomiaro.github.io/waveform-playlist](https://na
 ## License
 
 MIT
+
+Implementation provenance is documented in [PROVENANCE.md](PROVENANCE.md).

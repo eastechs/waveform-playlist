@@ -118,13 +118,17 @@ Uses tsup (same as all other packages). tsup auto-externalizes `dependencies` an
 
 ## Web Worker Peak Generation
 
-**Decision:** Generate `WaveformData` in a web worker at load time, then use `resample()` for near-instant zoom changes.
+**Decision:** Generate the permissive `@waveform-playlist/webaudio-peaks`
+`PeakStore` in a web worker at load time, then use `resample()` for near-instant
+zoom changes. The browser package must not import or depend on `waveform-data`.
 
 **Key files:**
 
-- `src/workers/peaksWorker.ts` — Inline Blob worker (portable across bundlers)
+- `src/workers/peaksWorker.ts` — Browser compatibility export for the
+  webaudio-peaks Blob worker
 - `src/hooks/useWaveformDataCache.ts` — Cache hook, watches tracks for clips with `audioBuffer` but no `waveformData`
-- `src/waveformDataLoader.ts` — `extractPeaksFromWaveformDataFull()` for resample + channel extraction
+- `src/waveformDataLoader.ts` — audiowaveform v1/v2 loading plus
+  `extractPeaksFromWaveformDataFull()` for resample + channel extraction
 
 **Peak resolution order in WaveformPlaylistContext:** (1) `clip.waveformData` (external pre-computed), (2) worker cache hit, (3) empty peaks while worker runs.
 
@@ -272,9 +276,12 @@ Internal hooks (`useClipDragHandlers`, `useClipSplitting`, `useAnnotationKeyboar
 
 ## Aligned Peak Resampling (waveformDataLoader.ts)
 
-**Decision:** When slicing WaveformData before resampling to a different scale, source slice indices must align to the resampling ratio.
+**Decision:** When slicing structural waveform data before resampling to a
+different scale, source slice indices must align to the resampling ratio.
 
-**Why:** WaveformData.resample() groups N consecutive source bins per output bin (N = targetScale/sourceScale). If the slice starts at a non-aligned index, output bins cover different source samples than a full-file resample would, causing zoom-dependent peak amplitude.
+**Why:** `resample()` groups source bins into coarser output bins. If the slice
+starts at a non-aligned index, output bins cover different source samples than
+a full-file resample would, causing zoom-dependent peak amplitude.
 
 **Pattern (in both `extractPeaksFromWaveformData` and `extractPeaksFromWaveformDataFull`):**
 
@@ -285,7 +292,7 @@ const targetEnd = Math.ceil((offsetSamples + durationSamples) / samplesPerPixel)
 const sourceStart = Math.floor(targetStart * ratio);
 const sourceEnd = Math.min(waveformData.length, Math.ceil(targetEnd * ratio));
 // slice(sourceStart, sourceEnd) → resample(targetScale)
-// (WaveformData.slice endIndex is exclusive, like Array.slice)
+// (structural slice endIndex is exclusive, like Array.slice)
 ```
 
 **Key invariant:** Floor/ceil slicing ensures all source bins contributing to target bins are included. For integer ratios (power-of-two scales like 256→1024), this gives exact bin-boundary alignment. For non-integer ratios (e.g., 256→1000), first/last bins may be slightly more inclusive than a full-file resample, but never underrepresent peaks.
@@ -301,7 +308,7 @@ const sourceEnd = Math.min(waveformData.length, Math.ceil(targetEnd * ratio));
 **Why:** When a recording is split into many clips sharing the same `AudioBuffer`, per-clip generation causes duplicate `Float32Array.slice()` allocations and OOM on large timelines.
 
 **Implementation:** Three `WeakMap<AudioBuffer, ...>` refs:
-- `generatedByBufferRef` — cached results (`WaveformData`)
+- `generatedByBufferRef` — cached results (`WaveformDataObject` / `PeakStore`)
 - `inflightByBufferRef` — in-flight worker promises
 - `subscribersByBufferRef` — clip IDs waiting for a buffer's result
 
@@ -323,7 +330,8 @@ const sourceEnd = Math.min(waveformData.length, Math.ceil(targetEnd * ratio));
 
 **Run:** `cd packages/browser && npx vitest run`
 
-**Test helper:** `WaveformData.create()` requires JSON with `{ version: 2, channels: 1, sample_rate, samples_per_pixel, bits, length, data }` — omitting `version`/`channels` causes a TypeScript error.
+**Test helper:** `parseAudiowaveformJson()` requires `{ version: 2, channels:
+1, sample_rate, samples_per_pixel, bits, length, data }`.
 
 **Provider-level animation-loop tests:** mount the REAL `WaveformPlaylistProvider` in jsdom (`// @vitest-environment jsdom` + `./jsdom-polyfills` first) with an injected fake adapter (`createAdapter` prop — no tone/playout import) whose `getCurrentTime()` the test controls, a probe child capturing context hooks, and a setTimeout-based `requestAnimationFrame` polyfill (jsdom lacks rAF without pretendToBeVisual). Reference: `animationLoopEndOfAudio.test.tsx` (end-of-audio semantics, recording suppression, armed-track mute).
 

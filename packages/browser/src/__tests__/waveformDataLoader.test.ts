@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import WaveformData from 'waveform-data';
+import { parseAudiowaveformJson, type PeakStore } from '@waveform-playlist/webaudio-peaks';
 import {
   extractPeaksFromWaveformData,
   extractPeaksFromWaveformDataFull,
@@ -12,11 +12,11 @@ import {
 function makeWaveformData(
   pairs: [min: number, max: number][],
   options: { scale?: number; sampleRate?: number; bits?: 8 | 16 } = {}
-): WaveformData {
+): PeakStore {
   const { scale = 256, sampleRate = 44100, bits = 16 } = options;
   const data = pairs.flatMap(([min, max]) => [min, max]);
 
-  return WaveformData.create({
+  return parseAudiowaveformJson({
     version: 2,
     channels: 1,
     sample_rate: sampleRate,
@@ -197,7 +197,7 @@ function makeStereoWaveformData(
   ch0Pairs: [min: number, max: number][],
   ch1Pairs: [min: number, max: number][],
   options: { scale?: number; sampleRate?: number; bits?: 8 | 16 } = {}
-): WaveformData {
+): PeakStore {
   const { scale = 256, sampleRate = 44100, bits = 16 } = options;
   const data: number[] = [];
 
@@ -205,7 +205,7 @@ function makeStereoWaveformData(
     data.push(ch0Pairs[i][0], ch0Pairs[i][1], ch1Pairs[i][0], ch1Pairs[i][1]);
   }
 
-  return WaveformData.create({
+  return parseAudiowaveformJson({
     version: 2,
     channels: 2,
     sample_rate: sampleRate,

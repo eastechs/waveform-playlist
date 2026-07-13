@@ -1,4 +1,16 @@
 import type { Peaks, Bits, PeakData } from '@waveform-playlist/core';
+import { PeakStore } from './peakStore';
+
+export { PeakStore } from './peakStore';
+export type { PeakStoreChannel, PeakStoreOptions } from './peakStore';
+export {
+  parseAudiowaveform,
+  parseAudiowaveformBinary,
+  parseAudiowaveformJson,
+} from './audiowaveform';
+export type { AudiowaveformJson } from './audiowaveform';
+export { createPeakWorker } from './worker';
+export type { PeakWorkerApi, PeakWorkerRequest } from './worker';
 
 /**
  * Find minimum and maximum values in a typed array
@@ -91,6 +103,60 @@ export function makeMono(channelPeaks: Peaks[], bits: Bits): Peaks[] {
 
   // Return in array so channel number counts still work
   return [peaks];
+}
+
+/**
+ * Build a reusable peak store from transferred channel arrays.
+ */
+export function createPeakStoreFromChannels(
+  channels: readonly Float32Array[],
+  sampleRate: number,
+  samplesPerPixel: number = 1000,
+  bits: Bits = 16,
+  isMono: boolean = false
+): PeakStore {
+  if (channels.length === 0) {
+    throw new RangeError('At least one audio channel is required');
+  }
+  const sourceFrameCount = channels[0].length;
+  if (channels.some((channel) => channel.length !== sourceFrameCount)) {
+    throw new RangeError('Every audio channel must contain the same number of frames');
+  }
+  if (!Number.isSafeInteger(sampleRate) || sampleRate <= 0) {
+    throw new RangeError('sampleRate must be a positive safe integer');
+  }
+  if (!Number.isSafeInteger(samplesPerPixel) || samplesPerPixel <= 0) {
+    throw new RangeError('samplesPerPixel must be a positive safe integer');
+  }
+  if (bits !== 8 && bits !== 16) {
+    throw new RangeError('bits must be 8 or 16');
+  }
+
+  let data = channels.map((channel) => extractPeaks(channel, samplesPerPixel, bits));
+  if (isMono && data.length > 1) data = makeMono(data, bits);
+
+  return new PeakStore({
+    sampleRate,
+    sourceFrameCount,
+    samplesPerPixel,
+    bits,
+    data,
+  });
+}
+
+/**
+ * Build a reusable peak store directly from an AudioBuffer.
+ */
+export function createPeakStoreFromAudioBuffer(
+  source: AudioBuffer,
+  samplesPerPixel: number = 1000,
+  bits: Bits = 16,
+  isMono: boolean = false
+): PeakStore {
+  const channels = Array.from({ length: source.numberOfChannels }, (_, channel) =>
+    source.getChannelData(channel)
+  );
+  return createPeakStoreFromChannels(channels, source.sampleRate, samplesPerPixel, bits, isMono);
 }
 
 /**

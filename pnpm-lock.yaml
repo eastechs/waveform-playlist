@@ -162,6 +162,9 @@ importers:
       '@waveform-playlist/ui-components':
         specifier: workspace:*
         version: link:../ui-components
+      '@waveform-playlist/webaudio-peaks':
+        specifier: workspace:*
+        version: link:../webaudio-peaks
       '@waveform-playlist/worklets':
         specifier: workspace:*
         version: link:../worklets
@@ -180,9 +183,6 @@ importers:
       uuid:
         specifier: ^13.0.2
         version: 13.0.2
-      waveform-data:
-        specifier: ^4.5.2
-        version: 4.5.2
     devDependencies:
       '@dawcore/wam':
         specifier: workspace:*
@@ -578,9 +578,6 @@ importers:
       react-async-hook:
         specifier: ^4.0.0
         version: 4.0.0(react@18.3.1)
-      waveform-data:
-        specifier: ^4.5.2
-        version: 4.5.2
     devDependencies:
       '@dnd-kit/abstract':
         specifier: ^0.3.2

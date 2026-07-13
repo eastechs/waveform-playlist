@@ -66,9 +66,9 @@
     "@waveform-playlist/core": "workspace:*",
     "@waveform-playlist/engine": "workspace:*",
     "@waveform-playlist/ui-components": "workspace:*",
+    "@waveform-playlist/webaudio-peaks": "workspace:*",
     "@waveform-playlist/worklets": "workspace:*",
-    "uuid": "^13.0.2",
-    "waveform-data": "^4.5.2"
+    "uuid": "^13.0.2"
   },
   "peerDependencies": {
     "@dawcore/wam": "workspace:^",

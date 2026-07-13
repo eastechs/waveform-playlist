@@ -21,6 +21,7 @@ import {
   type Fade,
   type AnnotationAction,
   type MidiNoteData,
+  type WaveformDataObject,
 } from '@waveform-playlist/core';
 import {
   type TimeFormat,
@@ -29,7 +30,6 @@ import {
 } from '@waveform-playlist/ui-components';
 import { extractPeaksFromWaveformDataFull } from './waveformDataLoader';
 import { syncSoundFontCacheToAdapter } from './soundFontSync';
-import type WaveformData from 'waveform-data';
 import type { PeakData } from '@waveform-playlist/core';
 import type { AnnotationData } from '@waveform-playlist/core';
 import {
@@ -1119,7 +1119,7 @@ export const WaveformPlaylistProvider: React.FC<WaveformPlaylistProviderProps> =
               peakSpp = Math.max(1, Math.round(samplesPerPixel * ratio));
             }
             peaks = extractPeaksFromWaveformDataFull(
-              clip.waveformData as WaveformData,
+              clip.waveformData,
               peakSpp,
               mono,
               peakOffset,
@@ -1138,7 +1138,7 @@ export const WaveformPlaylistProvider: React.FC<WaveformPlaylistProviderProps> =
           if (cached) {
             try {
               peaks = extractPeaksFromWaveformDataFull(
-                cached,
+                cached as WaveformDataObject,
                 samplesPerPixel,
                 mono,
                 clip.offsetSamples,

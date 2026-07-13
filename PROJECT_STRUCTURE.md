@@ -132,9 +132,11 @@ const clip = createClipFromSeconds({
 
 #### `@waveform-playlist/webaudio-peaks`
 
-- **Purpose:** Generate waveform visualization data from audio buffers
-- **Exports:** Peak data structures, peak generation functions
-- **Key concept:** Converts AudioBuffer → peak data for canvas rendering
+- **Purpose:** Generate, parse, slice, and resample waveform visualization data
+- **Exports:** Immutable `PeakStore`, audiowaveform v1/v2 parsers, transferable
+  worker lifecycle, and direct peak-generation functions
+- **Key concept:** Converts AudioBuffer or transferred channel arrays into a
+  structural `WaveformDataObject` without a copyleft runtime parser dependency
 - **Dependencies:** Core
 
 #### `@waveform-playlist/engine`

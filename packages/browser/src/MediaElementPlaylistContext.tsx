@@ -15,7 +15,6 @@ import { type WaveformDataObject } from '@waveform-playlist/core';
 import { type WaveformPlaylistTheme, defaultTheme } from '@waveform-playlist/ui-components';
 import type { AnnotationData } from '@waveform-playlist/core';
 import { extractPeaksFromWaveformData } from './waveformDataLoader';
-import type WaveformData from 'waveform-data';
 import type { PeakData } from '@waveform-playlist/core';
 import type { ClipPeaks, TrackClipPeaks } from './WaveformPlaylistContext';
 import { useAnimationFrameLoop } from './hooks/useAnimationFrameLoop';
@@ -342,7 +341,7 @@ export const MediaElementPlaylistProvider: React.FC<MediaElementPlaylistProvider
   useEffect(() => {
     try {
       const extractedPeaks = extractPeaksFromWaveformData(
-        track.waveformData as WaveformData,
+        track.waveformData,
         samplesPerPixel,
         0, // channel index
         0, // offset

@@ -28,7 +28,6 @@ async function staticEngineImportsInEntry(entry: string): Promise<string[]> {
       'react/jsx-runtime',
       'styled-components',
       '@dnd-kit/*',
-      'waveform-data',
       'uuid',
       '@dawcore/wam',
     ],
