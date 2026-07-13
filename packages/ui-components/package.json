@@ -1,6 +1,6 @@
 {
   "name": "@waveform-playlist/ui-components",
-  "version": "13.1.5",
+  "version": "13.1.5-eastechs.1",
   "description": "React UI components for waveform-playlist",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -33,12 +33,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/naomiaro/waveform-playlist.git",
+    "url": "https://github.com/eastechs/waveform-playlist.git",
     "directory": "packages/ui-components"
   },
-  "homepage": "https://naomiaro.github.io/waveform-playlist",
+  "homepage": "https://github.com/eastechs/waveform-playlist",
   "bugs": {
-    "url": "https://github.com/naomiaro/waveform-playlist/issues"
+    "url": "https://github.com/eastechs/waveform-playlist/issues"
   },
   "files": [
     "dist",
